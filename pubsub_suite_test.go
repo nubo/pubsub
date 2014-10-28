@@ -19,7 +19,7 @@ func TestGoPubSub(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	addr := os.Getenv("REDIS_ADDR")
-	Ω(addr).ShouldNot(BeEmpty())
+	Ω(addr).ShouldNot(BeEmpty(), "set REDIS_ADDR environment variable to run tests")
 	ps = pubsub.Dial("tcp", addr, 10, 1000)
 })
 
