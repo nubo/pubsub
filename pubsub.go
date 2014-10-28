@@ -52,6 +52,29 @@ func (c Conn) Subscribe(topic string, chn chan<- []byte) {
 	}(con)
 }
 
+// Subscribe to topic and get messages received for this topic sent to the
+// given channel as a message with an envelop that contains the topic name.
+//
+// This can be used for distinguishing messages by topic if multiple
+// subscriptions send to a single channel.
+func (c Conn) SubscribeMessage(topic string, chn chan<- Message) {
+	con := redis.PubSubConn{Conn: c.pool.Get()}
+	con.Subscribe(topic)
+
+	go func(con redis.PubSubConn, topic string) {
+		for {
+			switch v := con.Receive().(type) {
+			case redis.Message:
+				chn <- Message{Topic: topic, Payload: v.Data}
+			case redis.Subscription:
+			case error:
+				break
+			}
+		}
+		con.Unsubscribe(topic)
+	}(con, topic)
+}
+
 // Closes the connection to Redis. This closes the connection pool.
 func (c Conn) Close() {
 	if c.pool == nil {
