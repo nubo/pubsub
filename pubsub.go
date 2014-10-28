@@ -32,13 +32,6 @@ func (c Conn) Publish(topic string, msg []byte) {
 	con.Do("PUBLISH", topic, msg)
 }
 
-// Publish a message with the given topic.
-func (c Conn) PublishX(topic string, msg []byte) {
-	con := c.pool.Get()
-	defer con.Close()
-	con.Do("PUBLISH", topic, msg)
-}
-
 // Subscribe to topic and get messages received for this topic sent to the
 // given channel.
 func (c Conn) Subscribe(topic string, chn chan<- []byte) {
